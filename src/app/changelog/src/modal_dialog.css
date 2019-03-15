@@ -1,0 +1,25 @@
+.ng7-modal{
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    z-index: 1000;
+    padding: 5% 29%;
+    background-color: rgba(0, 0, 0, 0.77);
+    height:100%;
+    display:none;
+}
+.ng7-modal-container{
+    background-color: white;
+    width: 47%;
+    padding: 20px;
+    border-radius: 7px;
+}
+.ng7-modal-body{
+    padding:15px;
+}
+.ng7-addtemplatemsg{
+    padding: 13px;
+    background-color: lightblue;
+    border-radius: 3px;
+    display: none;
+}

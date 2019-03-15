@@ -1,0 +1,263 @@
+<div id="email-builder">
+	<div class="email-builder-preview-actions" >
+		<!--<div class="md-btn-group">-->
+			<!--<button class="md-btn md-btn-danger" (click)="preview = false">{{'Close Preview'  }}</button>-->
+			<!--<button class="md-btn md-btn-success" *ngIf="hasChanges()"  (click)="saveEmailTemplate()">{{'Email Save'  }}</button>-->
+		<!--</div>-->
+
+	</div>
+	<div class="email-builder-header" cdkDrag>
+		<div class="email-builder-header-actions">
+			<h2>XWT Email Designer</h2>
+		</div>
+
+		<div class="email-builder-header-actions">
+			<div class="md-btn-group" >
+
+				<i *ngIf="!!currentElement" class="actions md-icon component-material-icons close md-color-red-600" title="{{'close_element_settings'}}" (click)="editElement(null)">close</i>
+				<i class="actions md-icon component-material-icons save md-color-green-600" title="{{'email_save' }}" [ngClass]="{disabled: !hasChanges()}"   (click)="saveEmailTemplate()">save</i>
+				<i class="actions md-icon component-material-icons" title="{{'email_settings'  }}"  (click)="m_settings('emailSettings')">settings</i>
+			</div>
+			<div class="md-btn-group" style="margin-left: 30px;">
+				<button class="md-btn md-btn-success"  (click)="desktoppreview()"><i class="component-material-icons">desktop_windows</i></button>
+				<button class="md-btn md-btn-default" (click)="mobilepreview()"><i class="component-material-icons">phone_iphone</i></button>
+			</div>
+			<div class="md-btn-group">
+				<button class="md-btn md-btn-primary"  (click)="openmodel()">
+					Save As Template
+				</button>
+				<button class="md-btn md-btn-primary"  (click)="openExportContainer()">
+					<i class="component-material-icons">redo</i>
+					{{'export'}}
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="email-builder-content">
+		<div class="md-card">
+			<div class="md-card-content elements-list">
+				<ul class="md-list md-list-addon"
+					dragula="element"
+					[dragulaModel]="ELEMENT"
+					(dragulaModelChange)="element = $event"
+				>
+					<li *ngFor="let element of side_elements" data-type="{{element.type}}" (click)="elements_click()" >
+
+						<ng-template #tipcontent><strong>{{element.primary_head}}</strong> <img src='{{element.second_head  }}' width='150' /></ng-template>
+						<div class="md-list-addon-element"
+							 id="{{element.type}}"
+							 placement = "right"
+							 [ngbTooltip]="tipcontent"
+							 (click)="drag_on(element.type)"
+							>
+							<i class="component-material-icons" [innerHtml]="element.icon" ></i>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<!--<div position-relative [ngClass]="{configured: !!currentElement, preview: preview}">-->
+		<div position-relative>
+
+			<div id="myemailcontainer" class="builder">
+
+				<div class="email-container" dragula="element-html" [(dragulaModel)]="Email.elements" [ngClass]="{'empty':true}">
+					<div class="builder-element"  *ngFor="let element of Email.elements"  style="width: 100%" id= "{{element.id}}">
+						<!--<app-device src="{{getTemplate(Email_element.type)}}" (click)="onloadfunction(Email_element.type)"></app-device>-->
+						<div class="actions" id="{{element.id}}" [innerHtml] ="getTemplate( element )"></div>
+						<div class="div-click-event" (click)="editElement(element.id)"></div>
+						<i class="actions delete md-icon component-material-icons"  style ="z-index:11" title="{{'delete_element'}}"  (click)="removeElement(element.id)">delete</i>
+						<i class="actions clone md-icon component-material-icons"  style ="z-index:11" title="{{'clone_element'}}"  (click)="cloneElement(element.id)">content_copy</i>
+						<i title="{{'move_element'}} " style ="z-index:11" class="actions move md-icon  component-material-icons">drag_handle</i>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="md-card" *ngIf="currentElement" (click) = "side_bar_function(currentElement)" style="z-index:1000;">
+			<div class="md-card-content">
+				<i *ngIf="!!currentElement" class="actions md-icon component-material-icons close md-color-red-600" title="{{'close_element_settings'}}" (click)="editElement(null)">close</i>
+				<i class="actions md-icon component-material-icons save md-color-green-600" title="{{'email_save' }}" [ngClass]="{disabled: !hasChanges()}"   (click)="sideSave()">save</i>
+
+				<form action="#" onsubmit="return true">
+					<div *ngFor="let item of currentElement.options | keyvalue; trackBy:trackByFn" class="email-builder-element-edit-field">
+
+						<!--<div *ngIf="true">-->
+							<div *ngIf="item.key.indexOf('image') > -1" class="form-row">
+								<!--{{item.key}} : {{currentElement.options[item.key]}}-->
+								<mat-form-field>
+									<label for="{{item.key}}" class="md-label" >Image Url</label>
+									<div style="display: flex;">
+									<input name="{{item.key}}" id="{{item.key}}" class="md-input" matInput  (change)="onFileSelectec($event)" [(ngModel)]="currentElement.options[item.key]" />
+
+									<button type="button" class="md-icon upload-icon">
+										<label for="fileUp">
+											<i class="material-icons">file_upload</i>
+										</label>
+									</button>
+									</div>
+									<input #file hidden id="fileUp" name="file" type="file" style="width:280px; margin-top:-35px; position: absolute;" (change) = "InputFileChange(file.files, item.key)" >
+								</mat-form-field>
+							</div>
+							<!--{{ item.key.substring(0, 4)}}-->
+							<div *ngIf="item.key.substring(0, 4) == 'text'" class="form-row textarea">
+								<!--&lt;!&ndash;{{ item.key}}:{{item.value}} =>&ndash;&gt; {{currentElement.options[item.key]}}-->
+								<label for="builder_el_text" class="md-label" translate="Text">Text</label>
+								<ckeditor
+										name = "{{item.key+item.value}}"
+										id="builder_el_text"
+										ui-tinymce="tinymceOptions"
+										[(ngModel)]="currentElement.options[item.key]"
+										title="{{'builder_el_text'  }}"
+										[config]="editorConfig"
+								>
+								</ckeditor>
+							</div>
+							<div *ngIf="item.key == 'buttonText'" class="form-row">
+								<mat-form-field>
+									<label for="builder_el_o_btn_text" class="md-label">builder_el_o_btn_text</label>
+									<input name="builder_el_o_btn_text" id="builder_el_o_btn_text" type="text" class="md-input" matInput [(ngModel)]="currentElement.options[item.key]" />
+								</mat-form-field>
+							</div>
+
+							<div *ngIf="item.key == 'url'" class="form-row">
+								<mat-form-field>
+									<label for="builder_el_o_url" class="md-label" >builder_el_o_url</label>
+									<input name="builder_el_o_url" id="builder_el_o_url" type="url" class="md-input" matInput [(ngModel)]="currentElement.options[item.key]" />
+								</mat-form-field>
+							</div>
+							<!--{{currentElement.options[item.key]}}-->
+							<div class="form-row" *ngIf="item.key == 'align'">
+								<div class="md-btn-group">
+									<button type="button" class="md-btn md-btn-flat" [ngClass]="{'md-btn-primary': item.value == 'left', 'md-btn-flat-primary': item.value != 'left'}"  (click)=" currentElement.options[item.key] = 'left'" >left</button>
+									<button type="button" class="md-btn md-btn-flat" [ngClass]="{'md-btn-primary': item.value == 'center', 'md-btn-flat-primary': item.value != 'center'}"  (click)="currentElement.options[item.key] = 'center'" translate="center">center</button>
+									<button type="button" class="md-btn md-btn-flat" [ngClass]="{'md-btn-primary': item.value == 'right', 'md-btn-flat-primary': item.value != 'right'}"  (click)="currentElement.options[item.key] = 'right'" translate="right">right</button>
+								</div>
+							</div>
+
+							<div *ngIf="['title', 'subTitle'].indexOf(item.key) > -1" class="form-row md-form">
+								<!--{{item.key}}:{{currentElement.options[item.key]}}-->
+								<mat-form-field>
+									<label for="{{item.key}}" class="md-label">{{ item.key}}</label>
+									<input name="{{item.key+item.value}}" id="{{item.key}}" type="text" matInput class="md-input" [(ngModel)]="currentElement.options[item.key]"/>
+								</mat-form-field>
+							</div>
+
+							<div *ngIf="item.key == 'padding'" class="form-row padding-inputs">
+								<!--{{item.key}}:{{item.value}}-->
+								<!--<mat-form-field>-->
+									<label for="builder_el_o_top" class="md-label" translate="Top">[Top, Right, Bottom, Left]</label>
+									<!--<input name="{{item.key}}" id="builder_el_o_top" type="text" class="md-input" matInput [(ngModel)] ="currentElement.options[item.key]">-->
+									<div style="display:flex;">
+										<!--{{currentElement.options[item.key]}}-->
+										<div *ngFor="let padding_val of  currentElement.options[item.key].split(','); let i = index" style="width:20%">
+											<mat-form-field>
+												<input name="{{item.key+i}}" id="builder_el_o_top" type="text" class="md-input" matInput [(ngModel)] ="padding_val" (change) = "paddingChange(padding_val, item.key, i)">
+											</mat-form-field>
+										</div>
+									</div>
+
+									<!--<input name="{{item.key}}" id="builder_el_o_top" type="text" class="md-input" matInput [(ngModel)] ="currentElement.options[item.key]">-->
+									<!--<input name="{{item.key}}" id="builder_el_o_top" type="text" class="md-input" matInput [(ngModel)] ="currentElement.options[item.key]">-->
+									<!--<input name="{{item.key}}" id="builder_el_o_top" type="text" class="md-input" matInput [(ngModel)] ="currentElement.options[item.key]">-->
+									<!--<input name="{{item.key}}" id="builder_el_o_top" type="text" class="md-input" matInput [(ngModel)] ="currentElement.options[item.key]">-->
+
+								<!--</mat-form-field>-->
+								<!--<label for="builder_el_o_right" class="md-label" translate="Right">Right</label>-->
+								<!--<input name="{{item.key+'02'}}" id="builder_el_o_right" type="text" class="md-input" [(ngModel)]="currentElement.options[item.key][1]">-->
+
+								<!--<label for="builder_el_o_bottom" class="md-label"  translate="Bottom">Bottom</label>-->
+								<!--<input name="{{item.key+'03'}}" id="builder_el_o_bottom" type="text" class="md-input" [(ngModel)]="currentElement.options[item.key][2]">-->
+
+								<!--<label for="builder_el_o_left" class="md-label"  translate="Left">Left</label>-->
+								<!--<input name="{{item.key+'04'}}" id="builder_el_o_left" type="text" class="md-input" [(ngModel)]="currentElement.options[item.key][3]">-->
+							</div>
+
+							<div *ngIf="item.key == 'backgroundColor' || item.key == 'color' || item.key == 'buttonBackgroundColor'" class="form-row color-inputs" id="real">
+								<!--{{item.key}}:{{item.value}} {{currentElement.options[item.key]}}-->
+								<label class="md-label" for="elementBackgroundColor" *ngIf="item.key == 'backgroundColor'">{{ 'Background Color'}}</label>
+								<label class="md-label" for="elementBackgroundColor" *ngIf="item.key == 'color'">{{ 'Text Color' }}</label>
+								<label class="md-label" for="elementBackgroundColor" *ngIf="item.key == 'buttonBackgroundColor'">{{ 'Button Bg Color' }}</label>
+								<input id="elementBackgroundColor" type="color" name="currentElement.options[item.key]" [(ngModel)]="currentElement.options[item.key]" />
+							</div>
+						<!--</div>-->
+					</div>
+					<div *ngIf="currentElement == 'emailSettings'">
+						<div class="email-builder-element-edit-field">
+							<div class="form-row padding-inputs">
+								<label class="md-label" for="emailSettingsPaddingTop" translate="builder_el_o_top"></label>
+								<!--[ngModel]="currentElement.options.paddingTop"-->
+								<input id="emailSettingsPaddingTop" class="md-input" type="text" md-input >
+								<label class="md-label" for="emailSettingsPaddingBottom"></label>
+								<input id="emailSettingsPaddingBottom" type="text" class="md-input" md-input [(ngModel)]="currentElement.options.paddingBottom">
+							</div>
+						</div>
+
+						<div class="email-builder-element-edit-field">
+							<div class="form-row color-inputs" id="email-builder-element-edit">
+								<label class="md-label" for="emailSettingsBackground">{{ 'background_color'   }}</label>
+								<input id="emailSettingsBackground" type="color" [(ngModel)]="currentElement.options.backgroundColor" />
+							</div>
+						</div>
+
+					</div>
+					<div *ngIf="currentElement == 'export'">
+
+						<h2 [innerHtml]="'Choose Export Type'   "></h2>
+						<p [innerHtml]="'Export Description'  "></p>
+
+						<div class="email-builder-element-edit-field">
+							<mat-form-field>
+								<label for="emailName">{{'Email Name'  }}</label>
+								<input name="emailName" type="text" id="emailName" (change)="changeHtml()" class="md-input" matInput md-input [(ngModel)]="Email.name">
+							</mat-form-field>
+						</div>
+
+						<div class="md-btn-group">
+							<button  (click)="exportAsHtml = true" [ngClass]="{disabled: !!exportAsHtml}" class="md-btn md-btn-primary">{{'export as html'  }}</button>
+							<button  (click)="exportEmailAsJson()" class="md-btn md-btn-danger">{{'export as json'  }}</button>
+						</div>
+
+						<div *ngIf="!!exportAsHtml">
+							<div class="email-builder-element-edit-field">
+							</div>
+							<label for="emailHtml">{{'Copy Etml'  }}</label>
+							<textarea readonly id="emailHtml"  (click)="$(this).select()" cols="30" rows="10">{{emailHtml}}</textarea>
+							<button class="md-btn md-btn-success"  (click)="downloadHtml()">{{'Download HTML'  }}</button>
+						</div>
+						<div class="email-builder-element-edit-field">
+							<mat-form-field>
+								<label for="emailName">{{'Enter Email'  }}</label>
+								<input type="text" name="tags" id="youremail" class="md-input" matInput [(ngModel)]="user.email">
+							</mat-form-field>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Modal -->
+<div id="myModal" class="ng7-modal" role="dialog">
+	<div class="ng7-modal-container">
+		<h3 style="text-align:center">Save Template</h3>
+		<hr>
+		<div class="ng7-modal-body">
+			<mat-form-field>
+				<input type="text" class="md-input" matInput [(ngModel)]="templatetitle" placeholder="Enter Template Title">
+			</mat-form-field>
+			<mat-form-field>
+				<input type="text" class="md-input" [(ngModel)]="templatedescription" matInput placeholder="Enter Short Description">
+			</mat-form-field>
+			<div>
+				<p style="color:gray; font-size:15px;margin-top:15px">Attach ScreenShot</p>
+				<input type="file" id="templatescreenshot" class="mce-i-upload" [(ngModel)]="templateimage">
+			</div>
+			<h5 class="ng7-addtemplatemsg">Template saved successfully</h5>
+		</div>
+
+		<hr>
+		<button  type="button" class="md-btn md-btn-icon-default closemodal"  (click)="closemodel()">Close</button><input type="button"  (click)="saveAsTemplate()" class="md-btn md-btn-primary" value="Save">
+	</div>
+</div>
+

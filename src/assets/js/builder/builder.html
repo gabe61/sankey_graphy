@@ -1,0 +1,203 @@
+<div id="email-builder">
+    <div class="email-builder-preview-actions" ng-class="{preview: preview}">
+        <div class="md-btn-group">
+            <button class="md-btn md-btn-danger" ng-click="preview = false">{{'Close Preview' | translate}}</button>
+            <button class="md-btn md-btn-success" ng-if="hasChanges()" ng-click="saveEmailTemplate()">{{'Email Save' | translate}}</button>
+        </div>
+
+    </div>
+    <div class="email-builder-header" ng-class="{preview: preview}">
+        <div class="email-builder-header-actions">
+            <h2>XWT Email Designer</h2>
+        </div>
+
+        <div class="email-builder-header-actions">
+
+            <div class="md-btn-group">
+              <i ng-if="!!currentElement" class="actions md-icon material-icons close md-color-red-600" title="{{'close_element_settings' | translate}}" ng-click="editElement(null)">close</i>
+                <i class="actions md-icon material-icons save md-color-green-600" title="{{'email_save' | translate}}" ng-class="{disabled: !hasChanges()}" ng-click="saveEmailTemplate()">save</i>
+                <i class="actions md-icon material-icons" title="{{'email_settings' | translate}}" ng-click="editElement('emailSettings')">settings</i>
+            </div>
+            <div class="md-btn-group" style="margin-left: 30px;">
+                <button class="md-btn md-btn-success" ng-click="desktoppreview()"><i class="material-icons">desktop_windows</i></button>
+                <button class="md-btn md-btn-default"ng-click="mobilepreview()"><i class="material-icons">phone_iphone</i></button>
+            </div>
+            <div class="md-btn-group">
+                <button class="md-btn md-btn-primary" onclick="openmodel()">
+                    Save As Template
+                </button>
+                <button class="md-btn md-btn-primary" ng-click="openExportContainer()">
+                    <i class="material-icons">redo</i>
+                    {{'export' | translate}}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="email-builder-content">
+        <div class="md-card" ng-class="{preview: preview}">
+            <div class="md-card-content elements-list">
+                <ul class="md-list md-list-addon" dragula='"element"'>
+                    <li ng-repeat="element in elements" data-type="{{element.type}}">
+                        <div class="md-list-addon-element" tooltips tooltip-template="<strong>{{element.primary_head | translate}}</strong> <img src='{{element.second_head | translate}}' width='150' />" tooltip-side="right">
+                            <i class="material-icons" ng-bind-html="element.icon"></i>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div position-relative ng-class="{configured: !!currentElement, preview: preview}">
+            <div id="myemailcontainer" class="builder" ng-style="Email.emailSettings.options">
+                <div  class="email-container" ng-class="{empty: !Email.elements.length}" data-empty-template="{{'Drag and Drop Element Here' | translate}}" dragula='"element-html"'>
+                    <div class="builder-element" ng-class="{selected: currentElement.id == element.id}" ng-repeat="element in Email.elements track by element.id" id="{{ element.id }}" ng-click="editElement(element.id)">
+                        <ng-include src="getTemplate(element.type)"></ng-include>
+                        <i class="actions delete md-icon material-icons" title="{{'delete_element' | translate}}" ng-click="removeElement(element.id)">delete</i>
+                        <i class="actions clone md-icon material-icons" title="{{'clone_element' | translate}}" ng-click="cloneElement(element.id)">content_copy</i>
+                        <i ng-if="Email.elements.length > 1" title="{{'move_element' | translate}}" class="actions move md-icon material-icons">drag_handle</i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-card" ng-class="{empty: !currentElement || preview}">
+            <div class="md-card-content">
+                <form action="#" onsubmit="return false">
+                    <div ng-repeat="(key, option) in currentElement.options" ng-if="currentElement.type != 'emailSettings'" class="email-builder-element-edit-field">
+
+                        <div ng-if="key.indexOf('image') > -1" class="form-row">
+                            <label for="builder_el_o_image_url" class="md-label" translate="Image Url"></label>
+                            <input id="builder_el_o_image_url" type="text" class="md-input" md-input input-file-upload ng-model="currentElement.options[key]" />
+                        </div>
+
+                        <div ng-if="key.substring(0, 4) == 'text'" class="form-row textarea">
+                            <label for="builder_el_text" class="md-label" translate="Text"></label>
+                            <textarea id="builder_el_text" ui-tinymce="tinymceOptions" ng-model="currentElement.options[key]" title="{{'builder_el_text' | translate}}"></textarea>
+                        </div>
+                        <div ng-if="key == 'buttonText'" class="form-row">
+                            <label for="builder_el_o_btn_text" class="md-label" translate="builder_el_o_btn_text"></label>
+                            <input id="builder_el_o_btn_text" type="text" class="md-input" md-input ng-model="currentElement.options[key]" />
+                        </div>
+
+                        <div ng-if="key == 'url'" class="form-row">
+                            <label for="builder_el_o_url" class="md-label" translate="builder_el_o_url"></label>
+                            <input id="builder_el_o_url" type="url" class="md-input" md-input ng-model="currentElement.options[key]" />
+                        </div>
+
+                        <div ng-if="key == 'align'" class="form-row">
+                            <div class="md-btn-group">
+                                <button type="button" class="md-btn md-btn-flat" ng-class="{'md-btn-primary': option == 'left', 'md-btn-flat-primary': option != 'left'}" ng-click="currentElement.options[key] = 'left'" translate="left"></button>
+                                <button type="button" class="md-btn md-btn-flat" ng-class="{'md-btn-primary': option == 'center', 'md-btn-flat-primary': option != 'center'}" ng-click="currentElement.options[key] = 'center'" translate="center"></button>
+                                <button type="button" class="md-btn md-btn-flat" ng-class="{'md-btn-primary': option == 'right', 'md-btn-flat-primary': option != 'right'}" ng-click="currentElement.options[key] = 'right'" translate="right"></button>
+                            </div>
+                        </div>
+
+                        <div ng-if="['title', 'subTitle'].indexOf(key) > -1" class="form-row">
+                            <label for="{{key}}" class="md-label">{{ key | translate }}</label>
+                            <input id="{{key}}" type="text" class="md-input" md-input ng-model="currentElement.options[key]" />
+                        </div>
+
+                        <div ng-if="key == 'padding'" class="form-row padding-inputs">
+                            <label for="builder_el_o_top" class="md-label" translate="Top"></label>
+                            <input id="builder_el_o_top" type="text" class="md-input" md-input ng-model="currentElement.options[key][0]">
+
+                            <label for="builder_el_o_right" class="md-label" translate="Right"></label>
+                            <input id="builder_el_o_right" type="text" class="md-input" md-input ng-model="currentElement.options[key][1]">
+
+                            <label for="builder_el_o_bottom" class="md-label"  translate="Bottom"></label>
+                            <input id="builder_el_o_bottom" type="text" class="md-input" md-input ng-model="currentElement.options[key][2]">
+
+                            <label for="builder_el_o_left" class="md-label"  translate="Left"></label>
+                            <input id="builder_el_o_left" type="text" class="md-input" md-input ng-model="currentElement.options[key][3]">
+                        </div>
+
+                        <div ng-if="key == 'backgroundColor' || key == 'color' || key == 'buttonBackgroundColor'" class="form-row color-inputs">
+                            <label class="md-label" for="elementBackgroundColor" ng-if="key == 'backgroundColor'">{{ 'Background Color'  | translateCamelCase }}</label>
+                            <label class="md-label" for="elementBackgroundColor" ng-if="key == 'color'">{{ 'Text Color'  | translateCamelCase }}</label>
+                            <label class="md-label" for="elementBackgroundColor" ng-if="key == 'buttonBackgroundColor'">{{ 'Button Bg Color'  | translateCamelCase }}</label>
+                            <input id="elementBackgroundColor" type="color" ng-model="currentElement.options[key]" />
+                        </div>
+                    </div>
+                    <div ng-if="currentElement.type == 'emailSettings'">
+
+                        <div class="email-builder-element-edit-field">
+                            <div class="form-row padding-inputs">
+                                <label class="md-label" for="emailSettingsPaddingTop" translate="builder_el_o_top"></label>
+                                <input id="emailSettingsPaddingTop" class="md-input" type="text" md-input ng-model="currentElement.options.paddingTop">
+
+                                <label class="md-label" for="emailSettingsPaddingBottom" translate="builder_el_o_bottom"></label>
+                                <input id="emailSettingsPaddingBottom" type="text" class="md-input" md-input ng-model="currentElement.options.paddingBottom">
+                            </div>
+                        </div>
+
+                        <div class="email-builder-element-edit-field">
+                            <div class="form-row color-inputs">
+                                <label class="md-label" for="emailSettingsBackground">{{ 'background_color' | translate }}</label>
+                                <input id="emailSettingsBackground" type="color" ng-model="currentElement.options.backgroundColor" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div ng-if="currentElement == 'export'">
+
+                        <h2 ng-bind-html="'Choose Export Type' | translate | rawHtml"></h2>
+                        <p ng-bind-html="'Export Description' | translate | rawHtml : true"></p>
+
+                        <div class="email-builder-element-edit-field">
+                            <div class="form-row">
+                                <label for="emailName">{{'Email Name' | translate}}</label>
+                                <input type="text" id="emailName" ng-change="changeHtml()" class="md-input" md-input ng-model="Email.name">
+                            </div>
+                        </div>
+
+                        <div class="md-btn-group">
+                            <button ng-click="exportAsHtml = true" ng-class="{disabled: !!exportAsHtml}" class="md-btn md-btn-primary">{{'export as html' | translate}}</button>
+                            <button ng-click="exportEmailAsJson()" class="md-btn md-btn-danger">{{'export as json' | translate}}</button>
+                        </div>
+
+                        <div ng-if="!!exportAsHtml">
+                            <div class="email-builder-element-edit-field">
+                            </div>
+                            <label for="emailHtml">{{'Copy Etml' | translate}}</label>
+                            <textarea readonly id="emailHtml" onclick="$(this).select()" cols="30" rows="10">{{emailHtml}}</textarea>
+                            <button class="md-btn md-btn-success" ng-click="downloadHtml()">{{'Download HTML' | translate}}</button>
+                        </div>
+                        <div class="email-builder-element-edit-field">
+                            <div class="form-row">
+                                <label for="emailName">{{'Enter Email' | translate}}</label>
+                                <input type="text" name="tags" id="youremail" class="md-input" md-input ng-model="user.email">
+                            </div>
+                            <center style="padding-top:20px">
+                                <button ng-click="sendEmail(user.email)" class="md-btn md-btn-primary">{{'Send Email' | translate}}</button>
+
+                            </center>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+   <div class="modal-container">
+       <h3 style="text-align:center">Save Template</h3>
+       <hr>
+       <div class="modal-body">
+           <div>
+               <input type="text" class="md-input" ng-model="templatetitle" placeholder="Enter Template Title">
+           </div>
+           <div>
+               <input type="text" class="md-input" ng-model="templatedescription" placeholder="Enter Short Description">
+           </div>
+           <div>
+               <p style="color:gray; font-size:15px;margin-top:15px">Attach ScreenShot</p>
+               <input type="file" id="templatescreenshot" class="mce-i-upload" ng-model="templateimage">
+           </div>
+           <h5 class="addtemplatemsg">Template saved successfully</h5>
+       </div>
+
+       <hr>
+       <center>
+           <button  type="button" class="md-btn md-btn-icon-default closemodal" onclick="closemodel()">Close</button><input type="button" ng-click="saveAsTemplate()" class="md-btn md-btn-primary" value="Save">
+       </center>
+   </div>
+</div>
+
